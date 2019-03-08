@@ -1,5 +1,6 @@
 #!/bin/bash
- 
+
+
 #############################
 ## Create DataBase Function
 
@@ -7,14 +8,16 @@ function createDB {
 clear;
 echo "==> PLZ, Write Your DataBase Name = ";
 read databaseName ;
-if [ -d $databaseName ] 
+if [ -d data/$databaseName ] 
 then echo "DataBase Already Exist ";
 sleep 1 ;
 echo "Plz, Choose Another Name For Your DataBase";
 else
 clear;
 echo "Please Wait ...";
-mkdir $databaseName ;
+mkdir data/$databaseName ;
+touch data/$databaseName/$databaseName.meta ;
+echo -e $databaseName >> data/databases.meta ;
 sleep 1 ;
 echo "DataBase Created Successfully" ;
 return 0 ;
@@ -29,14 +32,15 @@ function deleteDB {
 clear;
 echo "==> PLZ, Write DataBase Name you wish to delete = ";
 read databaseName ;
-if [ ! -d $databaseName ] 
+if [ ! -d data/$databaseName ] 
 then echo "No DataBase Found ";
 sleep 1 ;
 echo "Plz, Make Sure from DataBase Name";
 else
 clear;
 echo "Please Wait ...";
-rm -r $databaseName ;
+rm -r data/$databaseName ;
+sed -i "/$databaseName/d" data/databases.meta
 sleep 1 ;
 echo "DataBase $databaseName Deleted Successfully" ;
 return 0 ;
