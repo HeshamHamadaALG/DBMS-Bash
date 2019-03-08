@@ -61,14 +61,14 @@ echo "Are you sure you want to delete database ( $databaseName ) : " ;
 echo "Enter [ Y ] to delete Or [ N ] to cancel" ;
 read answer ;
 
-if [ $answer == [yY] ]
+if [[ $answer == [yY] ]]
 then echo "Please Wait ...";
 rm -r data/$databaseName ;
 sed -i "/$databaseName/d" data/databases.meta
 sleep 1 ;
 echo "DataBase $databaseName Deleted Successfully" ;
 return 0 ;
-elif [ $answer == [nN] ]
+elif [[ $answer == [nN] ]]
 then echo "Cancel DataBase Deletion ..."
 sleep 1 ;
 main;
