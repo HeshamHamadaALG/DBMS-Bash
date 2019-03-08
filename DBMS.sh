@@ -5,9 +5,25 @@
 ## Create DataBase Function
 
 function createDB {
-clear;
+echo ""
 echo "==> PLZ, Write Your DataBase Name = ";
 read databaseName ;
+
+## validate user input 
+
+val="$(echo $databaseName | head -c 1)" ;
+
+if [[ $val == [0-9] ]]
+then echo "WARNING !! , You can't start database name with Number"; createDB;
+elif [[ $databaseName =~ [^[:alnum:]]+ ]]
+then echo "WARNING !! , there is ( Special Char ) in database name"; createDB;
+elif [[ $databaseName =~ [[:space:]] ]]
+then echo "WARNING !! , There is ( space ) in your database name"; createDB;
+elif [ -Z $databaseName ]
+then echo "WARNING !! , Empty database name"; createDB;
+
+else
+
 if [ -d data/$databaseName ] 
 then echo "DataBase Already Exist ";
 sleep 1 ;
@@ -19,8 +35,10 @@ mkdir data/$databaseName ;
 touch data/$databaseName/$databaseName.meta ;
 echo -e $databaseName >> data/databases.meta ;
 sleep 1 ;
-echo "DataBase Created Successfully" ;
+echo "DataBase $databaseName Created Successfully" ;
 return 0 ;
+fi
+
 fi
 }
 
@@ -38,12 +56,27 @@ sleep 1 ;
 echo "Plz, Make Sure from DataBase Name";
 else
 clear;
-echo "Please Wait ...";
+echo "";
+echo "Are you sure you want to delete database ( $databaseName ) : " ;
+echo "Enter [ Y ] to delete Or [ N ] to cancel" ;
+read answer ;
+
+if [ $answer == [yY] ]
+then echo "Please Wait ...";
 rm -r data/$databaseName ;
 sed -i "/$databaseName/d" data/databases.meta
 sleep 1 ;
 echo "DataBase $databaseName Deleted Successfully" ;
 return 0 ;
+elif [ $answer == [nN] ]
+then echo "Cancel DataBase Deletion ..."
+sleep 1 ;
+main;
+else 
+echo "No Valid Answer"
+sleep 1 ;
+deleteDB;
+fi 
 fi
 }
 
@@ -126,6 +159,7 @@ select menu in "Create DB" "Choose DB" "Delete DB" "Exit"
 do
 case $menu in 
 "Create DB")
+clear;
 createDB;
 echo "Please Wait , Redirecting you to main menu"
 sleep 2 ;
