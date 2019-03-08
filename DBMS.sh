@@ -2,6 +2,24 @@
 
 
 #############################
+## Display DataBase Function
+
+function displayDB {
+echo "";
+if [[ -s data/databases.meta ]]
+then echo "----------------------"
+echo "| List Of DataBases  |"
+echo "----------------------"
+# awk -F"\n" '{ print $1 }' data/databases.meta ;
+cat data/databases.meta | column -t -s ;
+else 
+echo "---------------------"
+echo "| No DataBase Found |"
+echo "---------------------"
+fi
+}
+
+#############################
 ## Create DataBase Function
 
 function createDB {
@@ -102,7 +120,11 @@ echo "Database Name ?";
 dbMenu;
 ;;
 "Display DataBases")
-echo "you choose Display DataBases";
+clear;
+displayDB;
+echo "";
+echo "";
+echo "Plz , Press Enter to back to menu";
 ;;
 "Back")
 main;
