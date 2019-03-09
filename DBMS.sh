@@ -237,67 +237,72 @@ function creatColumn {
 
 ##### Create Columns #######
 
-echo " You Are in database name $dbname";
-echo "";
-echo "==> Plz , Enter No. Of columns you wish in table $tableName : ";
-read colNum ;
-if [[ $colNum == [0-9] ]] && [[ $colNum != [0] ]]   ## Validate number of colmuns 
-then echo "";
-echo "Plz wait while processing your data ...";
-sleep 1 ;
+	echo " You Are in database name $dbname";
+	echo "";
+	echo "==> Plz , Enter No. Of columns you wish in table $tableName : ";
+	read colNum ;
+	if [[ $colNum == [0-9] ]] && [[ $colNum != [0] ]]   ## Validate number of colmuns 
+	then echo "";
+		echo "Plz wait while processing your data ...";
+		sleep 1 ;
 
-##### create primary Key #######
+	##### create primary Key #######
 
-clear;
-echo "";
-echo "=====> Enter Name of Primary Key for table $tableName : ";
-read pKey;
+		clear;
+		local invalid=1
+		until (( invalid == 0 ))
+		do
+			echo "";
+			echo "=====> Enter Name of Primary Key for table $tableName : ";
+			read pKey;
 
-## ++++ Validate pKey 
-valp="$(echo $pKey | head -c 1)" ;
-
-if [[ $valp == [0-9] ]]
-then echo "WARNING !! , You can't start Column name with Number"; sleep 1 ; echo "Plz Write a valid name "; creatColumn;
-elif [[ $pKey =~ [^[:alnum:]]+ ]]
-then echo "WARNING !! , there is ( Special Char ) in Column name"; sleep 1 ; echo "Plz Write a valid name "; creatColumn;
-elif [[ $pKey =~ [[:space:]] ]]
-then echo "WARNING !! , There is ( space ) in your Column name"; sleep 1 ; echo "Plz Write a valid name "; creatColumn;
-elif [ -z ${pKey} ]
-then echo "WARNING !! , Empty Column name"; sleep 1 ; echo "Plz Write a valid name "; creatColumn;
-else
-echo "";
-echo "=====> Enter Type of Primary Key for table $tableName : ";
-echo "";
-select choice in "Integer" "String"
-			do
-				case $choice in
-					"Integer" )
-						ptype="int" ;
-                        echo "";
-                        echo "Plz wait while processing your data ...";
-                        sleep 1 ;
-                        creatOtherColumns;
-					  ;;
-					"String" )
-						ptype="char" ;
-                        echo "";
-                        echo "Plz wait while processing your data ...";
-                        sleep 1 ;
-                        creatOtherColumns;
-					  ;;
-						* )
-							echo "Invalid input, Please try Again!" ;
+			## ++++ Validate pKey 
+			valp="$(echo $pKey | head -c 1)" ;
+			if [[ $valp == [0-9] ]]
+			then echo "WARNING !! , You can't start Column name with Number"; sleep 1 ; echo "Plz Write a valid name ";
+			elif [[ $pKey =~ [^[:alnum:]]+ ]]
+			then echo "WARNING !! , there is ( Special Char ) in Column name"; sleep 1 ; echo "Plz Write a valid name ";
+			elif [[ $pKey =~ [[:space:]] ]]
+			then echo "WARNING !! , There is ( space ) in your Column name"; sleep 1 ; echo "Plz Write a valid name ";
+			elif [ -z ${pKey} ]
+			then echo "WARNING !! , Empty Column name"; sleep 1 ; echo "Plz Write a valid name ";
+			else invalid=0
+			fi
+		done
+		echo "";
+		echo "=====> Enter Type of Primary Key for table $tableName : ";
+		echo "";
+		select choice in "Integer" "String"
+					do
+						case $choice in
+							"Integer" )
+								ptype="int" ;
+								echo "";
+								echo "Plz wait while processing your data ...";
+								sleep 1 ;
+								creatOtherColumns ;
+								break;
 							;;
-					esac
-			done
-fi
+							"String" )
+								ptype="char" ;
+								echo "";
+								echo "Plz wait while processing your data ...";
+								sleep 1 ;
+								creatOtherColumns;
+								break;
+							;;
+								* )
+									echo "Invalid input, Please try Again!" ;
+									;;
+							esac
+					done
+	else 
+	echo "Plz enter a valid number of columns ";
+	echo "redirecting you to column numbers .... "
+	sleep 2 ;
+	creatColumn;
+	fi     ## End Of Validation number of colmuns 
 
-else 
-echo "Plz enter a valid number of columns ";
-echo "redirecting you to column numbers .... "
-sleep 2 ;
-creatColumn;
-fi     ## End Of Validation number of colmuns 
 }
 
 ############################
@@ -307,48 +312,56 @@ function creatOtherColumns {
     unset 'typ' ;
 
 ##### create Columns #######
-
+local colSchema=';'
 for i in $(seq 2 $colNum)
 do 
+	local invalid=1
+	until (( invalid == 0 ))
+	do
+		clear;
+		echo "";
+		echo "=====> Enter Name Column for table $tableName  no $i : ";
+		read col[i];
 
-clear;
-echo "";
-echo "=====> Enter Name Column for table $tableName  no $i : ";
-read col[i];
+		## ++++ Validate col 
+		valp="$(echo ${col[i]} | head -c 1)" ;
 
-## ++++ Validate col 
-valp="$(echo ${col[i]} | head -c 1)" ;
-
-if [[ ${valp[i]} == [0-9] ]]
-then echo "WARNING !! , You can't start Column name with Number"; sleep 1 ; creatOtherColumns;
-elif [[ ${col[i]} =~ [^[:alnum:]]+ ]]
-then echo "WARNING !! , there is ( Special Char ) in Column name"; sleep 1 ; creatOtherColumns;
-elif [[ ${col[i]} =~ [[:space:]] ]]
-then echo "WARNING !! , There is ( space ) in your Column name"; sleep 1 ; creatOtherColumns;
-elif [ -z ${col[i]} ]
-then echo "WARNING !! , Empty Column name"; sleep 1 ; creatOtherColumns;
-else
-echo "";
-echo "=====> Enter Type Column for table [$tableName] column name [${col[i]}] no [$i] : ";
-echo "";
-select choice in "Integer" "String"
-			do
-				case $choice in
-					"Integer" )
-						typ[i]="int" ;
-					    break;;
-					"String" )
-						typ[i]="char";
-					    break;;
-						* )
-							echo "Invalid input, Please try Again!" ;
-							;;
-					esac
-			done
-fi
-
-echo -e $tableName";"$pKey":"$ptype":p"";"${col[i]}":"${typ[i]} >> data/$dbname/$dbname.meta ;   ## Printing Table 
+		if [[ ${valp[i]} == [0-9] ]]
+		then echo "WARNING !! , You can't start Column name with Number"; sleep 1 ; 
+		elif [[ ${col[i]} =~ [^[:alnum:]]+ ]]
+		then echo "WARNING !! , there is ( Special Char ) in Column name"; sleep 1 ; 
+		elif [[ ${col[i]} =~ [[:space:]] ]]
+		then echo "WARNING !! , There is ( space ) in your Column name"; sleep 1 ; 
+		elif [ -z ${col[i]} ]
+		then echo "WARNING !! , Empty Column name"; sleep 1 ; 
+		else invalid=0
+		fi
+	done
+	echo "";
+	echo "=====> Enter Type Column for table [$tableName] column name [${col[i]}] no [$i] : ";
+	echo "";
+	select choice in "Integer" "String"
+				do
+					case $choice in
+						"Integer" )
+							typ[i]="int" ;
+							break;;
+						"String" )
+							typ[i]="char";
+							break;;
+							* )
+								echo "Invalid input, Please try Again!" ;
+								;;
+						esac
+				done
+				colSchema="$colSchema${col[i]}":"${typ[i]};"
 done 
+if (( $colNum > 2 ))
+then
+	colSchema=${colSchema::-1}
+else colSchema=''
+fi
+echo -e $tableName";"$pKey":"$ptype":p"$colSchema >> data/$dbname/$dbname.meta ;   ## Printing Table 
 clear;
 echo "";
 echo "Your Table [$tableName] created Successfully in DataBase [$dbname] with ' $colNum ' Columns , and your primary Key is [ $pKey ]"
