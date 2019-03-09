@@ -10,8 +10,7 @@ if [[ -s data/databases.meta ]]
 then echo "----------------------"
 echo "| List Of DataBases  |"
 echo "----------------------"
-# awk -F"\n" '{ print $1 }' data/databases.meta ;
-cat data/databases.meta | column -t -s ;
+cat data/databases.meta ;
 else 
 echo "---------------------"
 echo "| No DataBase Found |"
@@ -37,7 +36,7 @@ elif [[ $databaseName =~ [^[:alnum:]]+ ]]
 then echo "WARNING !! , there is ( Special Char ) in database name"; createDB;
 elif [[ $databaseName =~ [[:space:]] ]]
 then echo "WARNING !! , There is ( space ) in your database name"; createDB;
-elif [ -Z $databaseName ]
+elif [ -z ${databaseName} ]
 then echo "WARNING !! , Empty database name"; createDB;
 
 else
@@ -144,17 +143,27 @@ clear;
 echo "";
 echo "==> You are in Choose DB Menu <==";
 echo "";
+echo "==> Plz , Enter DataBase Name : ";
+read dbname ;
+
+if [ -d data/$dbname ] 
+then clear ; 
+echo "";
+echo "==> You are in database [ $dbname ] .";
+echo "";
+
 select chMenu in "Create Table" "Choose table" "Delete Table" "Back"
 do
 case $chMenu in 
 "Create Table")
-echo "you choose Create Table";
+clear;
+createTable;
 ;;
 "Choose table")
 echo "you choose choose Table";
 ;;
 "Delete Table")
-echo "you choose Delete Table";
+deleteTable;
 ;;
 "Back")
 chooseMenu ;
@@ -164,7 +173,232 @@ echo "Please Choose From the List";
 ;;
 esac
 done
+
+else 
+echo "No DataBase Found .."
+echo "Make Sure you Enter name of database ."
+sleep 1.5 ;
+chooseMenu;
+fi 
 }
+
+#####################
+## create table function
+
+function createTable {
+echo "";
+echo "==> Create Table in database [ $dbname ] .";
+echo "";
+
+echo "==> PLZ, Write Your Table Name = ";
+read tableName ;
+
+## validate user input 
+
+valt="$(echo $tableName | head -c 1)" ;
+
+if [[ $valt == [0-9] ]]
+then echo "WARNING !! , You can't start Table name with Number"; dbMenu;
+elif [[ $tableName =~ [^[:alnum:]]+ ]]
+then echo "WARNING !! , there is ( Special Char ) in Table name"; dbMenu;
+elif [[ $tableName =~ [[:space:]] ]]
+then echo "WARNING !! , There is ( space ) in your Table name"; dbMenu;
+elif [ -z ${tableName} ]
+then echo "WARNING !! , Empty Table name"; dbMenu;
+
+else
+
+if [ -e data/$dbname/$tableName ] 
+then echo "Table with this name Already Exist ";
+sleep 1 ;
+echo "Plz, Choose Another Name For Your DataBase";
+sleep 1 ;
+createTable;
+else
+clear;
+echo "Please Wait ...";
+sleep 1 ;
+touch data/$dbname/$tableName ;
+echo "Table [ $tableName ] Created Successfully" ;
+sleep 1 ;
+clear;
+creatColumn;
+fi
+
+fi
+}
+
+##########################
+## create column Function
+
+function creatColumn {
+
+    unset 'ptype' ;
+
+##### Create Columns #######
+
+echo " You Are in database name $dbname";
+echo "";
+echo "==> Plz , Enter No. Of columns you wish in table $tableName : ";
+read colNum ;
+if [[ $colNum == [0-9] ]] && [[ $colNum != [0] ]]   ## Validate number of colmuns 
+then echo "";
+echo "Plz wait while processing your data ...";
+sleep 1 ;
+
+##### create primary Key #######
+
+clear;
+echo "";
+echo "=====> Enter Name of Primary Key for table $tableName : ";
+read pKey;
+
+## ++++ Validate pKey 
+valp="$(echo $pKey | head -c 1)" ;
+
+if [[ $valp == [0-9] ]]
+then echo "WARNING !! , You can't start Column name with Number"; sleep 1 ; echo "Plz Write a valid name "; creatColumn;
+elif [[ $pKey =~ [^[:alnum:]]+ ]]
+then echo "WARNING !! , there is ( Special Char ) in Column name"; sleep 1 ; echo "Plz Write a valid name "; creatColumn;
+elif [[ $pKey =~ [[:space:]] ]]
+then echo "WARNING !! , There is ( space ) in your Column name"; sleep 1 ; echo "Plz Write a valid name "; creatColumn;
+elif [ -z ${pKey} ]
+then echo "WARNING !! , Empty Column name"; sleep 1 ; echo "Plz Write a valid name "; creatColumn;
+else
+echo "";
+echo "=====> Enter Type of Primary Key for table $tableName : ";
+echo "";
+select choice in "Integer" "String"
+			do
+				case $choice in
+					"Integer" )
+						ptype="int" ;
+                        echo "";
+                        echo "Plz wait while processing your data ...";
+                        sleep 1 ;
+                        creatOtherColumns;
+					  ;;
+					"String" )
+						ptype="char" ;
+                        echo "";
+                        echo "Plz wait while processing your data ...";
+                        sleep 1 ;
+                        creatOtherColumns;
+					  ;;
+						* )
+							echo "Invalid input, Please try Again!" ;
+							;;
+					esac
+			done
+fi
+
+else 
+echo "Plz enter a valid number of columns ";
+echo "redirecting you to column numbers .... "
+sleep 2 ;
+creatColumn;
+fi     ## End Of Validation number of colmuns 
+}
+
+############################
+############################
+
+function creatOtherColumns {
+    unset 'typ' ;
+
+##### create Columns #######
+
+for i in $(seq 2 $colNum)
+do 
+
+clear;
+echo "";
+echo "=====> Enter Name Column for table $tableName  no $i : ";
+read col[i];
+
+## ++++ Validate col 
+valp="$(echo ${col[i]} | head -c 1)" ;
+
+if [[ ${valp[i]} == [0-9] ]]
+then echo "WARNING !! , You can't start Column name with Number"; sleep 1 ; creatOtherColumns;
+elif [[ ${col[i]} =~ [^[:alnum:]]+ ]]
+then echo "WARNING !! , there is ( Special Char ) in Column name"; sleep 1 ; creatOtherColumns;
+elif [[ ${col[i]} =~ [[:space:]] ]]
+then echo "WARNING !! , There is ( space ) in your Column name"; sleep 1 ; creatOtherColumns;
+elif [ -z ${col[i]} ]
+then echo "WARNING !! , Empty Column name"; sleep 1 ; creatOtherColumns;
+else
+echo "";
+echo "=====> Enter Type Column for table [$tableName] column name [${col[i]}] no [$i] : ";
+echo "";
+select choice in "Integer" "String"
+			do
+				case $choice in
+					"Integer" )
+						typ[i]="int" ;
+					    break;;
+					"String" )
+						typ[i]="char";
+					    break;;
+						* )
+							echo "Invalid input, Please try Again!" ;
+							;;
+					esac
+			done
+fi
+
+echo -e $tableName";"$pKey":"$ptype":p"";"${col[i]}":"${typ[i]} >> data/$dbname/$dbname.meta ;   ## Printing Table 
+done 
+clear;
+echo "";
+echo "Your Table [$tableName] created Successfully in DataBase [$dbname] with ' $colNum ' Columns , and your primary Key is [ $pKey ]"
+echo "";
+echo "Plz wait while redirecting you to main page ..."
+sleep 2 ;
+main;
+}
+
+#############################
+## Delete Table Function
+
+function deleteTable {
+clear;
+echo "==> PLZ, Write Table Name you wish to delete = ";
+read tableDel ;
+if [ ! -e data/$dbname/$tableDel ] 
+then echo "No Table Found ";
+sleep 1 ;
+echo "Plz, Make Sure from Table Name";
+else
+clear;
+echo "";
+echo "Are you sure you want to delete Table ( $tableDel ) from DataBase ( $dbname ) : " ;
+echo "Enter [ Y ] to delete Or [ N ] to cancel" ;
+read ans ;
+
+if [[ $ans == [yY] ]]
+then echo "Please Wait ...";
+rm -r data/$dbname/$tableDel ;
+sed -i "/$tableDel/d" data/$dbname/$dbname.meta
+sleep 1 ;
+echo "Table [ $tableDel ] Deleted Successfully from DataBase [ $data ]" ;
+echo "plz waith while redirecting you to the menu ..."
+sleep 2 ;
+chooseMenu;
+elif [[ $ans == [nN] ]]
+then echo "Cancel Table Deletion ..."
+sleep 1 ;
+chooseMenu;
+else 
+echo "No Valid Answer"
+sleep 1 ;
+chooseMenu;
+fi 
+fi
+}
+
+
+
 
 #####################
 ## Main Menu function
@@ -172,7 +406,9 @@ done
 function main {
 clear;
 echo "#################################################";
-echo "##         Welcome , to ITI OS DBMS            ##";
+echo "#                                               #";
+echo "#          Welcome , to ITI OS DBMS             #";
+echo "#                                               #";
 echo "#################################################";
 echo "";
 echo "==>  Please, write No. of your choice <==";
