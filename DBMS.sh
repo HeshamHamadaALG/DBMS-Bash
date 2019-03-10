@@ -357,7 +357,7 @@ do
 				done
 				colSchema="$colSchema${col[i]}":"${typ[i]};"
 done 
-if (( $colNum > 2 ))
+if (( $colNum > 1 ))
 then
 	colSchema=${colSchema::-1}
 else colSchema=''
@@ -410,8 +410,6 @@ chooseMenu;
 fi 
 fi
 }
-
-
 
 function intialization () 
 {

@@ -347,7 +347,8 @@ function updateFromTable ()
     done
     (( primaryKey++ ))
     local updatedLine=$(awk 'BEGIN {FS = ";" ; f=1 } { if( $"'"$primaryKey"'" == "'"$primaryKeyValue"'" ) { f=0; print NR; }  }  END { if(f==1) print -1 ;} ' ./data/$databaseName/$table )
-    sed -i "$updatedLine""s/.*/$newRowFormated/" ./data/$databaseName/$table
+    # sed -i "$updatedLine""s/.*/$newRowFormated/" ./data/$databaseName/$table
+    sed -i "$updatedLine""s/.*/$(echo $newRowFormated | sed -e 's/[\/&]/\\&/g')/" ./data/$databaseName/$table
     sleep 1
     echo "Row Updated Successfully"
 }  

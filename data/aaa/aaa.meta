@@ -1,2 +1,7 @@
 tb4;a:int:p;b:char
 tb6;primary:int:p
+abcT;abc:char:p
+a;a:char:p;b:char;c:char
+b;asdf:char:p
+c;asd:char:p
+hh;p:char:p;col2:char
