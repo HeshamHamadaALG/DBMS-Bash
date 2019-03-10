@@ -335,6 +335,8 @@ do
 		then echo "WARNING !! , There is ( space ) in your Column name"; sleep 1 ; 
 		elif [ -z ${col[i]} ]
 		then echo "WARNING !! , Empty Column name"; sleep 1 ; 
+		elif [[ ${col[i]} == $pKey ]]
+		then echo "WARNING !! , The Name Already taken for [ Primary Key ]"; sleep 1 ;
 		else invalid=0
 		fi
 	done
