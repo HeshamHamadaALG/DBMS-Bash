@@ -370,12 +370,12 @@ do
 				colSchema="$colSchema${col[i]}":"${typ[i]};"
 
 done 
-if (( $colNum > 2 ))
+if (( $colNum > 1 ))
 then
 	colSchema=${colSchema::-1}
 else colSchema=''
 fi
-echo -e $tableName";"$pKey":"$ptype":p"$colSchema >> data/$databaseName/$databaseName.meta ;   ## Printing Table 
+echo -e $tableName";"$pKey":"$ptype":p"$colSch ema >> data/$databaseName/$databaseName.meta ;   ## Printing Table 
 clear;
 echo "";
 echo "Your Table [$tableName] created Successfully in DataBase [$databaseName] with ' $colNum ' Columns , and your primary Key is [ $pKey ]"
@@ -423,8 +423,6 @@ chooseMenu;
 fi 
 fi
 }
-
-
 
 function intialization () 
 {
