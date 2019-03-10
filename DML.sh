@@ -17,6 +17,7 @@ array_contains () {
 
 function chooseTableMenu ()
 {
+    clear;
     echo "Choose Table"
     local tables=($( awk 'BEGIN {FS = ";"} { print $1 }' ./data/$databaseName/$databaseName.meta ))
     table=''
@@ -59,13 +60,13 @@ function printTableHeader () {
 }
 
 function displayTable () {
+    clear;
     local table=$1
     local i=0;
     local rows
     while read -r line
     do
         rows[$i]=$line
-        echo ${rows[$i]}
         (( i++ ))
     done < ./data/$databaseName/$table
     len=${#rows[@]}
@@ -172,6 +173,7 @@ function insertIntoTable () {
     # newRowFormated="$newRowFormated"
     # local newRowFormated=$(echo ${newRow[@]}  | ( awk 'BEGIN {FS = " "; OFS="-" } { str=""; for (i=1; i<NF; i++) str=str $i ";" ; str= str $NF '\n'; print str; } ' ) )
     # echo $newRowFormated
+    clear;
     echo -e $newRowFormated >> data/$databaseName/$table ;
     sleep 1
     echo "Insertion Done Successfully"
@@ -230,6 +232,7 @@ function deleteFromTable ()
                 fi
         fi
     done
+    clear;
     (( primaryKey++ ))                         
     deleteRowLine=$(awk 'BEGIN {FS = ";" ; f=1 } { if( $"'"$primaryKey"'" == "'"$input"'" ) { f=0; print NR; }  }  END { if(f==1) print -1 ;} ' ./data/$databaseName/$table)
     if (( deleteRowLine == -1 ))
@@ -345,6 +348,7 @@ function updateFromTable ()
             newRowFormated="$newRowFormated;"
         fi
     done
+    clear;
     (( primaryKey++ ))
     local updatedLine=$(awk 'BEGIN {FS = ";" ; f=1 } { if( $"'"$primaryKey"'" == "'"$primaryKeyValue"'" ) { f=0; print NR; }  }  END { if(f==1) print -1 ;} ' ./data/$databaseName/$table )
     # sed -i "$updatedLine""s/.*/$newRowFormated/" ./data/$databaseName/$table
@@ -400,12 +404,10 @@ function selectFromTable ()
             fi
         fi
     done
+    clear;
     (( primaryKey++ ))
-    # echo primaryKey $primaryKey
-    # echo input $input
     local rowNo=$( awk 'BEGIN {FS = ";" ; f=1;} {  if( $"'"$primaryKey"'" == "'"$input"'" ) {f=0; print NR; } } END {  if(f==1) print -1; }' ./data/$databaseName/$table )
     local row=$(sed -n $rowNo'p' ./data/$databaseName/$table)
-    # echo rowNo $rowNo
     if (( rowNo > 0))
     then
         printTableHeader $table
@@ -425,6 +427,7 @@ function tableOperationMenu ()
 
 function tableMenu ()
 {
+    clear;
     while true; do
     option=$(tableOperationMenu)
     case $option in
