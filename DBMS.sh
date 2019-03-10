@@ -199,13 +199,13 @@ read tableName ;
 valt="$(echo $tableName | head -c 1)" ;
 
 if [[ $valt == [0-9] ]]
-then echo "WARNING !! , You can't start Table name with Number"; dbMenu;
+then echo "WARNING !! , You can't start Table name with Number"; sleep 1 ;createTable;
 elif [[ $tableName =~ [^[:alnum:]]+ ]]
-then echo "WARNING !! , there is ( Special Char ) in Table name"; dbMenu;
+then echo "WARNING !! , there is ( Special Char ) in Table name"; sleep 1 ; createTable;
 elif [[ $tableName =~ [[:space:]] ]]
-then echo "WARNING !! , There is ( space ) in your Table name"; dbMenu;
+then echo "WARNING !! , There is ( space ) in your Table name"; sleep 1 ; createTable;
 elif [ -z ${tableName} ]
-then echo "WARNING !! , Empty Table name"; dbMenu;
+then echo "WARNING !! , Empty Table name"; sleep 1 ; createTable;
 
 else
 
@@ -314,12 +314,12 @@ function creatOtherColumns {
 
 ##### create Columns #######
 local colSchema=';'
-local isValid = true 
 for i in $(seq 2 $colNum)
 do 
 	local invalid=1
 	until (( invalid == 0 ))
 	do
+		local notRepeated=0
 		clear;
 		echo "";
 		echo "=====> Enter Name Column for table $tableName  no $i : ";
@@ -338,45 +338,45 @@ do
 		then echo "WARNING !! , Empty Column name"; sleep 1 ; 
 		elif [[ ${col[i]} == $pKey ]]
 		then echo "WARNING !! , The Name Already taken for [ Primary Key ]"; sleep 1 ;
-		# for (( j=0; j<i; j++ ))
-		# do 
-		# if [[ ${col[i]} == ${col[i-j]} ]]
-		# then isValid = false
-		# fi
-		# done
-		# elif [[ $isValid == false ]]
-		# elif [[ ${col[i]} == ${col[i-1]} to ${col[1]}  ]]
-		# then echo "WARNING !! , The Name Already taken"; sleep 1 ;
 		else invalid=0
+		fi
+		for (( j=2; j<$i; j++ ))
+		do 
+				if [[ ${col[$i]} == ${col[$j]} ]]
+				then notRepeated=1
+				fi
+		done
+		if (( $notRepeated == 1 )) 
+		then echo "WARNING !! , The Name Already taken"; sleep 1 ;
+		invalid=1
 		fi
 	done
 	echo "";
 	echo "=====> Enter Type Column for table [$tableName] column name [${col[i]}] no [$i] : ";
 	echo "";
 	select choice in "Integer" "String"
-				do
-					case $choice in
-						"Integer" )
-							typ[i]="int" ;
-							break;;
-						"String" )
-							typ[i]="char";
-							break;;
-							* )
-								echo "Invalid input, Please try Again!" ;
-								;;
-						esac
-				done
-				colSchema="$colSchema${col[i]}":"${typ[i]};"
-
+	do
+		case $choice in
+			"Integer" )
+				typ[i]="int" ;
+				break;;
+			"String" )
+				typ[i]="char";
+				break;;
+				* )
+					echo "Invalid input, Please try Again!" ;
+					;;
+			esac
+	done
+	colSchema="$colSchema${col[i]}":"${typ[i]};"
 done 
 if (( $colNum > 1 ))
 then
 	colSchema=${colSchema::-1}
 else colSchema=''
 fi
-echo -e $tableName";"$pKey":"$ptype":p"$colSch ema >> data/$databaseName/$databaseName.meta ;   ## Printing Table 
-clear;
+echo -e $tableName";"$pKey":"$ptype":p"$colSchema >> data/$databaseName/$databaseName.meta ;   ## Printing Table 
+# clear;
 echo "";
 echo "Your Table [$tableName] created Successfully in DataBase [$databaseName] with ' $colNum ' Columns , and your primary Key is [ $pKey ]"
 echo "";
