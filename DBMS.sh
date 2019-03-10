@@ -314,6 +314,7 @@ function creatOtherColumns {
 
 ##### create Columns #######
 local colSchema=';'
+local isValid = true 
 for i in $(seq 2 $colNum)
 do 
 	local invalid=1
@@ -337,6 +338,15 @@ do
 		then echo "WARNING !! , Empty Column name"; sleep 1 ; 
 		elif [[ ${col[i]} == $pKey ]]
 		then echo "WARNING !! , The Name Already taken for [ Primary Key ]"; sleep 1 ;
+		# for (( j=0; j<i; j++ ))
+		# do 
+		# if [[ ${col[i]} == ${col[i-j]} ]]
+		# then isValid = false
+		# fi
+		# done
+		# elif [[ $isValid == false ]]
+		# elif [[ ${col[i]} == ${col[i-1]} to ${col[1]}  ]]
+		# then echo "WARNING !! , The Name Already taken"; sleep 1 ;
 		else invalid=0
 		fi
 	done
@@ -358,6 +368,7 @@ do
 						esac
 				done
 				colSchema="$colSchema${col[i]}":"${typ[i]};"
+
 done 
 if (( $colNum > 2 ))
 then
