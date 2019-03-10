@@ -413,12 +413,24 @@ fi
 
 
 
+function intialization () 
+{
+	if [[ ! -d data ]]
+	then 
+		mkdir data ;
+	fi
+	if [[ ! -f data/databases.meta ]]
+	then
+		touch data/databases.meta
+	fi
+}
 
 #####################
 ## Main Menu function
 
 function main {
 clear;
+intialization
 echo "#################################################";
 echo "#                                               #";
 echo "#          Welcome , to ITI OS DBMS             #";
