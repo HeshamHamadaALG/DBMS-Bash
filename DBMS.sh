@@ -4,6 +4,7 @@
 #############################
 ## Display DataBase Function
 
+export databaseName
 function displayDB {
 echo "";
 if [[ -s data/databases.meta ]]
@@ -25,7 +26,6 @@ function createDB {
 echo ""
 echo "==> PLZ, Write Your DataBase Name = ";
 read databaseName ;
-
 ## validate user input 
 
 val="$(echo $databaseName | head -c 1)" ;
@@ -144,12 +144,12 @@ echo "";
 echo "==> You are in Choose DB Menu <==";
 echo "";
 echo "==> Plz , Enter DataBase Name : ";
-read dbname ;
+read databaseName ;
 
-if [ -d data/$dbname ] 
+if [ -d data/$databaseName ] 
 then clear ; 
 echo "";
-echo "==> You are in database [ $dbname ] .";
+echo "==> You are in database [ $databaseName ] .";
 echo "";
 
 select chMenu in "Create Table" "Choose table" "Delete Table" "Back"
@@ -161,6 +161,7 @@ createTable;
 ;;
 "Choose table")
 echo "you choose choose Table";
+chooseTableMenu
 ;;
 "Delete Table")
 deleteTable;
@@ -187,7 +188,7 @@ fi
 
 function createTable {
 echo "";
-echo "==> Create Table in database [ $dbname ] .";
+echo "==> Create Table in database [ $databaseName ] .";
 echo "";
 
 echo "==> PLZ, Write Your Table Name = ";
@@ -208,7 +209,7 @@ then echo "WARNING !! , Empty Table name"; dbMenu;
 
 else
 
-if [ -e data/$dbname/$tableName ] 
+if [ -e data/$databaseName/$tableName ] 
 then echo "Table with this name Already Exist ";
 sleep 1 ;
 echo "Plz, Choose Another Name For Your DataBase";
@@ -218,7 +219,7 @@ else
 clear;
 echo "Please Wait ...";
 sleep 1 ;
-touch data/$dbname/$tableName ;
+touch data/$databaseName/$tableName ;
 echo "Table [ $tableName ] Created Successfully" ;
 sleep 1 ;
 clear;
@@ -237,7 +238,7 @@ function creatColumn {
 
 ##### Create Columns #######
 
-	echo " You Are in database name $dbname";
+	echo " You Are in database name $databaseName";
 	echo "";
 	echo "==> Plz , Enter No. Of columns you wish in table $tableName : ";
 	read colNum ;
@@ -361,10 +362,10 @@ then
 	colSchema=${colSchema::-1}
 else colSchema=''
 fi
-echo -e $tableName";"$pKey":"$ptype":p"$colSchema >> data/$dbname/$dbname.meta ;   ## Printing Table 
+echo -e $tableName";"$pKey":"$ptype":p"$colSchema >> data/$databaseName/$databaseName.meta ;   ## Printing Table 
 clear;
 echo "";
-echo "Your Table [$tableName] created Successfully in DataBase [$dbname] with ' $colNum ' Columns , and your primary Key is [ $pKey ]"
+echo "Your Table [$tableName] created Successfully in DataBase [$databaseName] with ' $colNum ' Columns , and your primary Key is [ $pKey ]"
 echo "";
 echo "Plz wait while redirecting you to main page ..."
 sleep 2 ;
@@ -378,21 +379,21 @@ function deleteTable {
 clear;
 echo "==> PLZ, Write Table Name you wish to delete = ";
 read tableDel ;
-if [ ! -e data/$dbname/$tableDel ] 
+if [ ! -e data/$databaseName/$tableDel ] 
 then echo "No Table Found ";
 sleep 1 ;
 echo "Plz, Make Sure from Table Name";
 else
 clear;
 echo "";
-echo "Are you sure you want to delete Table ( $tableDel ) from DataBase ( $dbname ) : " ;
+echo "Are you sure you want to delete Table ( $tableDel ) from DataBase ( $databaseName ) : " ;
 echo "Enter [ Y ] to delete Or [ N ] to cancel" ;
 read ans ;
 
 if [[ $ans == [yY] ]]
 then echo "Please Wait ...";
-rm -r data/$dbname/$tableDel ;
-sed -i "/$tableDel/d" data/$dbname/$dbname.meta
+rm -r data/$databaseName/$tableDel ;
+sed -i "/$tableDel/d" data/$databaseName/$databaseName.meta
 sleep 1 ;
 echo "Table [ $tableDel ] Deleted Successfully from DataBase [ $data ]" ;
 echo "plz waith while redirecting you to the menu ..."
@@ -457,5 +458,6 @@ esac
 done
 }
 
-## Start Main Function 
-main ;
+# ## Start Main Function 
+# export -f dbMenu
+# main ;

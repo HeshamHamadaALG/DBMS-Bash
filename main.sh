@@ -1,4 +1,5 @@
 #!/bin/bash
-echo "Welcome to DBMS"
-export db='database1'
-. ./DML.sh
+source ./DBMS.sh
+source ./DML.sh
+
+main

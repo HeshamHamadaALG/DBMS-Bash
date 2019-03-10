@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# source ./DBMS.sh
 array_contains () {
     local seeking="$1"   # Save first argument in a variable
     shift            # Shift all arguments to the left (original $1 gets lost)
@@ -17,20 +18,24 @@ array_contains () {
 function chooseTableMenu ()
 {
     echo "Choose Table"
-    local tables=($( awk 'BEGIN {FS = ";"} { print $1 }' ./data/$db/$db.meta ))
+    local tables=($( awk 'BEGIN {FS = ";"} { print $1 }' ./data/$databaseName/$databaseName.meta ))
     table=''
-    select item in ${tables[@]}
+    select item in ${tables[@]} "Back"
     do
          res=$(array_contains "$item" "${tables[@]}" )
-         if (( $res == 1 ))
+         if [[ $item == 'Back' ]]
          then
-            echo "You Select Table: " $item
-            tableMenu $item
-            break
-         else
-            echo "No Matching Table"
-         fi
-
+            chooseMenu
+         else 
+            if (( $res == 1 ))
+            then
+                echo "You Select Table: " $item
+                tableMenu $item
+                break
+            else
+                echo "No Matching Table"
+            fi
+        fi
     done
 }
 
@@ -42,7 +47,7 @@ printBorder () {
 }
 function printTableHeader () {
     local table=$1
-    local cols=($( awk 'BEGIN {FS = ";"} { if( "'"$table"'" == $1 ) for (i=2; i<=NF; i++) print $i }' ./data/$db/$db.meta | awk 'BEGIN {FS = ":"} { print $1 }' ))
+    local cols=($( awk 'BEGIN {FS = ";"} { if( "'"$table"'" == $1 ) for (i=2; i<=NF; i++) print $i }' ./data/$databaseName/$databaseName.meta | awk 'BEGIN {FS = ":"} { print $1 }' ))
     local len=${#cols[@]}
     local header=''
     for (( i=0; i<$len; i++ ))
@@ -62,7 +67,7 @@ function displayTable () {
         rows[$i]=$line
         echo ${rows[$i]}
         (( i++ ))
-    done < ./data/$db/$table
+    done < ./data/$databaseName/$table
     len=${#rows[@]}
     printTableHeader $1
     for (( i=0; i< $len; i++ ))
@@ -77,12 +82,12 @@ function checkUniquePK ()
     (( primaryKey++ ))
     local table=$2
     local value=$3
-    return $(awk 'BEGIN {FS = ";" ; f=1 } { if( $"'"$primaryKey"'" == "'"$value"'" ) f=0 }  END { print f ;} ' ./data/$db/$table)
+    return $(awk 'BEGIN {FS = ";" ; f=1 } { if( $"'"$primaryKey"'" == "'"$value"'" ) f=0 }  END { print f ;} ' ./data/$databaseName/$table)
 }
 
 function insertIntoTable () {
     local table=$1
-    local cols=($( awk 'BEGIN {FS = ";"} { if( "'"$table"'" == $1 ) for (i=2; i<=NF; i++) print $i }' ./data/$db/$db.meta ))
+    local cols=($( awk 'BEGIN {FS = ";"} { if( "'"$table"'" == $1 ) for (i=2; i<=NF; i++) print $i }' ./data/$databaseName/$databaseName.meta ))
     local primaryKey=-1
     local dataTypes
     local colName
@@ -167,7 +172,7 @@ function insertIntoTable () {
     # newRowFormated="$newRowFormated"
     # local newRowFormated=$(echo ${newRow[@]}  | ( awk 'BEGIN {FS = " "; OFS="-" } { str=""; for (i=1; i<NF; i++) str=str $i ";" ; str= str $NF '\n'; print str; } ' ) )
     # echo $newRowFormated
-    echo -e $newRowFormated >> data/$db/$table ;
+    echo -e $newRowFormated >> data/$databaseName/$table ;
     sleep 1
     echo "Insertion Done Successfully"
     # echo ${newRow[@]} 
@@ -177,7 +182,7 @@ function insertIntoTable () {
 function deleteFromTable () 
 {
     local table=$1 
-    local cols=($( awk 'BEGIN {FS = ";"} { if( "'"$table"'" == $1 ) for (i=2; i<=NF; i++) print $i }' ./data/$db/$db.meta ))
+    local cols=($( awk 'BEGIN {FS = ";"} { if( "'"$table"'" == $1 ) for (i=2; i<=NF; i++) print $i }' ./data/$databaseName/$databaseName.meta ))
     local primaryKey=-1
     local dataTypes
     local colName
@@ -226,12 +231,12 @@ function deleteFromTable ()
         fi
     done
     (( primaryKey++ ))                         
-    deleteRowLine=$(awk 'BEGIN {FS = ";" ; f=1 } { if( $"'"$primaryKey"'" == "'"$input"'" ) { f=0; print NR; }  }  END { if(f==1) print -1 ;} ' ./data/$db/$table)
+    deleteRowLine=$(awk 'BEGIN {FS = ";" ; f=1 } { if( $"'"$primaryKey"'" == "'"$input"'" ) { f=0; print NR; }  }  END { if(f==1) print -1 ;} ' ./data/$databaseName/$table)
     if (( deleteRowLine == -1 ))
     then
         echo "No Row Affected"
     else 
-        sed -i $deleteRowLine'd' ./data/$db/$table
+        sed -i $deleteRowLine'd' ./data/$databaseName/$table
         sleep 1
         echo "Deletion Done Successfully"
     fi 
@@ -241,7 +246,7 @@ function updateFromTable ()
 {
     table=$1
     local table=$1 
-    local cols=($( awk 'BEGIN {FS = ";"} { if( "'"$table"'" == $1 ) for (i=2; i<=NF; i++) print $i }' ./data/$db/$db.meta ))
+    local cols=($( awk 'BEGIN {FS = ";"} { if( "'"$table"'" == $1 ) for (i=2; i<=NF; i++) print $i }' ./data/$databaseName/$databaseName.meta ))
     local primaryKey=-1
     local dataTypes
     local colName
@@ -341,8 +346,8 @@ function updateFromTable ()
         fi
     done
     (( primaryKey++ ))
-    local updatedLine=$(awk 'BEGIN {FS = ";" ; f=1 } { if( $"'"$primaryKey"'" == "'"$primaryKeyValue"'" ) { f=0; print NR; }  }  END { if(f==1) print -1 ;} ' ./data/$db/$table )
-    sed -i "$updatedLine""s/.*/$newRowFormated/" ./data/$db/$table
+    local updatedLine=$(awk 'BEGIN {FS = ";" ; f=1 } { if( $"'"$primaryKey"'" == "'"$primaryKeyValue"'" ) { f=0; print NR; }  }  END { if(f==1) print -1 ;} ' ./data/$databaseName/$table )
+    sed -i "$updatedLine""s/.*/$newRowFormated/" ./data/$databaseName/$table
     sleep 1
     echo "Row Updated Successfully"
 }  
@@ -352,7 +357,7 @@ function selectFromTable ()
     # printTableHeader $1
     local table=$1
     local table=$1 
-    local cols=($( awk 'BEGIN {FS = ";"} { if( "'"$table"'" == $1 ) for (i=2; i<=NF; i++) print $i }' ./data/$db/$db.meta ))
+    local cols=($( awk 'BEGIN {FS = ";"} { if( "'"$table"'" == $1 ) for (i=2; i<=NF; i++) print $i }' ./data/$databaseName/$databaseName.meta ))
     local primaryKey=-2
     local dataTypes
     local colName
@@ -397,8 +402,8 @@ function selectFromTable ()
     (( primaryKey++ ))
     # echo primaryKey $primaryKey
     # echo input $input
-    local rowNo=$( awk 'BEGIN {FS = ";" ; f=1;} {  if( $"'"$primaryKey"'" == "'"$input"'" ) {f=0; print NR; } } END {  if(f==1) print -1; }' ./data/$db/$table )
-    local row=$(sed -n $rowNo'p' ./data/$db/$table)
+    local rowNo=$( awk 'BEGIN {FS = ";" ; f=1;} {  if( $"'"$primaryKey"'" == "'"$input"'" ) {f=0; print NR; } } END {  if(f==1) print -1; }' ./data/$databaseName/$table )
+    local row=$(sed -n $rowNo'p' ./data/$databaseName/$table)
     # echo rowNo $rowNo
     if (( rowNo > 0))
     then
@@ -441,18 +446,18 @@ function tableMenu ()
         chooseTableMenu
         ;;
     'Quit' )
-        break
+        exit
         ;;
     * ) echo "not Matching"
     esac
 done
 }
 
-# echo $db
+# echo $databaseName
 # deleteFromTable table1
 #  insertIntoTable table1
 # selectFromTable table2
-chooseTableMenu 
+# chooseTableMenu 
 # tableMenu table1
 # echo $res
 # insertIntoTable table2
